@@ -5,15 +5,19 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
+from datetime import datetime
+import csv
+
+CSV_FILENAME = "data.csv"
 
 def main():
     driver = create_driver()
 
     login_time = get_login_time(driver)
-    print(login_time)
 
     contacts_time = get_contacts_load_time(driver)
-    print(contacts_time)
+
+    save_to_csv(CSV_FILENAME, login_time, contacts_time)
 
     logout(driver)
     # close the browser window
@@ -73,6 +77,7 @@ def get_login_time(driver):
 
     return login_delta_secs
 
+# presses on the "Contacts" tab and returns the time taken for data table to load
 def get_contacts_load_time(driver):
     # click on "Contacts" tab
     CONTACTS_TAB_XPATH = "//*[@id=\"module_5\"]"
@@ -90,6 +95,12 @@ def get_contacts_load_time(driver):
     contacts_delta_secs = contacts_end_time - contacts_start_time
 
     return contacts_delta_secs
+
+def save_to_csv(filename, login_time, contacts_time):
+    time = datetime.utcnow().strftime("%Y/%m/%d %H:%M UTC")
+    with open(filename, 'a') as file:
+        writer = csv.writer(file)
+        writer.writerow([login_time, contacts_time, time])
 
 def logout(driver):
     LOGOUT_XPATH = "//*[@id=\"header\"]/div[3]/a[4]"
