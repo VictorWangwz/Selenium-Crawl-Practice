@@ -6,6 +6,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from datetime import datetime
 import csv
+import pytz
 
 CSV_FILENAME = "data.csv"
 
@@ -94,11 +95,17 @@ def get_contacts_load_time(driver):
     return contacts_delta_secs
 
 def save_to_csv(filename, login_time, contacts_time):
-    time = datetime.utcnow().strftime("%d/%m/%Y %H:%M UTC")
+    time = get_time_est().strftime("%d/%m/%Y %H:%M EST")
     with open(filename, 'a') as file:
         writer = csv.writer(file)
         # format times with 2 decimal places
         writer.writerow(["{:.2f}".format(login_time), "{:.2f}".format(contacts_time), time])
+
+def get_time_est():
+    etc_timezone = pytz.timezone('US/Eastern')
+    utc = pytz.utc
+    etc_time = utc.localize(datetime.utcnow()).astimezone(etc_timezone)
+    return etc_time
 
 def logout(driver):
     LOGOUT_XPATH = "//*[@id=\"header\"]/div[3]/a[4]"
