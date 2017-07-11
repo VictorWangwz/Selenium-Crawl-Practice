@@ -14,14 +14,12 @@ def main():
     driver = create_driver()
 
     login_time = get_login_time(driver)
-
     contacts_time = get_contacts_load_time(driver)
 
-    save_to_csv(CSV_FILENAME, login_time, contacts_time)
-
     logout(driver)
-    # close the browser window
     driver.quit()
+
+    save_to_csv(CSV_FILENAME, login_time, contacts_time)
 
 # If chromedriver.exe is not found in this project directory, please download from
 # http://chromedriver.storage.googleapis.com/index.html?path=2.30/
@@ -66,7 +64,7 @@ def get_login_time(driver):
     # switch to active tab
     driver.switch_to.window(driver.window_handles[1])
 
-    # wait until "3 Days" tab is clickable (this could be any element on the homepage)
+    # wait until "3 Days" tab is clickable (this could be replaced with any element on the homepage)
     THREE_DAYS_TAB_XPATH = "//*[@id=\"ctl06_home_tabs_a_tab_1\"]"
     WEB_DRIVER_TIMEOUT_SECS = 600
     wait = WebDriverWait(driver, WEB_DRIVER_TIMEOUT_SECS)
@@ -97,10 +95,11 @@ def get_contacts_load_time(driver):
     return contacts_delta_secs
 
 def save_to_csv(filename, login_time, contacts_time):
-    time = datetime.utcnow().strftime("%Y/%m/%d %H:%M UTC")
+    time = datetime.utcnow().strftime("%d/%m/%Y %H:%M UTC")
     with open(filename, 'a') as file:
         writer = csv.writer(file)
-        writer.writerow([login_time, contacts_time, time])
+        # format times with 2 decimal places
+        writer.writerow(["{:.2f}".format(login_time), "{:.2f}".format(contacts_time), time])
 
 def logout(driver):
     LOGOUT_XPATH = "//*[@id=\"header\"]/div[3]/a[4]"
