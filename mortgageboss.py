@@ -9,17 +9,19 @@ import csv
 import pytz
 
 CSV_FILENAME = "data.csv"
+WEB_DRIVER_TIMEOUT_SECS = 600
 
 def main():
     driver = create_driver()
 
     login_time = get_login_time(driver)
     contacts_time = get_contacts_load_time(driver)
+    open_a_contact_time = get_open_a_contact_time(driver)
 
     logout(driver)
     driver.quit()
 
-    save_to_csv(CSV_FILENAME, login_time, contacts_time)
+    save_to_csv(CSV_FILENAME, login_time, contacts_time, open_a_contact_time)
 
 # If chromedriver.exe is not found in this project directory, please download from
 # http://chromedriver.storage.googleapis.com/index.html?path=2.30/
@@ -66,7 +68,6 @@ def get_login_time(driver):
 
     # wait until "3 Days" tab is clickable (this could be replaced with any element on the homepage)
     THREE_DAYS_TAB_XPATH = "//*[@id=\"ctl06_home_tabs_a_tab_1\"]"
-    WEB_DRIVER_TIMEOUT_SECS = 600
     wait = WebDriverWait(driver, WEB_DRIVER_TIMEOUT_SECS)
     three_days_tab = wait.until(EC.element_to_be_clickable((By.XPATH, THREE_DAYS_TAB_XPATH)))
 
@@ -85,21 +86,45 @@ def get_contacts_load_time(driver):
 
     # wait until "A" button in data table navigation is clickable
     A_BUTTON_XPATH = "//*[@id=\"a_letter_A\"]"
-    WEB_DRIVER_TIMEOUT_SECS = 600
     wait = WebDriverWait(driver, WEB_DRIVER_TIMEOUT_SECS)
     a_button = wait.until(EC.element_to_be_clickable((By.XPATH, A_BUTTON_XPATH)))
     contacts_end_time = time.time()
 
     contacts_delta_secs = contacts_end_time - contacts_start_time
-
     return contacts_delta_secs
 
-def save_to_csv(filename, login_time, contacts_time):
+def get_open_a_contact_time(driver):
+    # click on first contact
+    FIRST_CONTACT_XPATH = "//*[@id=\"tr_5_996016\"]"
+    first_contact = driver.find_element_by_xpath(FIRST_CONTACT_XPATH)
+    first_contact.click()
+    first_contact_start_time = time.time()
+
+    # wait until "Opportunities" tab is displayed
+    OPPORTUNITIES_TAB_XPATH = '//*[@id="ctl00_a_tab_14"]/span'
+    wait = WebDriverWait(driver, WEB_DRIVER_TIMEOUT_SECS)
+    opportunities_tab = wait.until(EC.element_to_be_clickable((By.XPATH, OPPORTUNITIES_TAB_XPATH)))
+    first_contact_end_time = time.time()
+
+    first_contact_delta_secs = first_contact_end_time - first_contact_start_time
+
+    # close contact page
+    CLOSE_BUTTON_XPATH = "//*[@id=\"close_1\"]"
+    close_button = driver.find_element_by_xpath(CLOSE_BUTTON_XPATH)
+    close_button.click()
+
+    return first_contact_delta_secs
+
+
+def save_to_csv(filename, login_time, contacts_time, open_contact_time):
     time = get_time_est().strftime("%d/%m/%Y %H:%M EST")
     with open(filename, 'a') as file:
         writer = csv.writer(file)
         # format times with 2 decimal places
-        writer.writerow(["{:.2f}".format(login_time), "{:.2f}".format(contacts_time), time])
+        writer.writerow([format_time(login_time), format_time(contacts_time), format_time(open_contact_time), time])
+
+def format_time(time):
+    return "{:.2f}".format(time)
 
 def get_time_est():
     etc_timezone = pytz.timezone('US/Eastern')
