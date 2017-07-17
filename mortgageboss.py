@@ -17,11 +17,13 @@ def main():
     login_time = get_login_time(driver)
     contacts_time = get_contacts_load_time(driver)
     open_a_contact_time = get_open_a_contact_time(driver)
+    deals_time = get_deals_load_time(driver)
+    open_a_deal_time = get_open_deal_time(driver)
 
     logout(driver)
     driver.quit()
 
-    save_to_csv(CSV_FILENAME, login_time, contacts_time, open_a_contact_time)
+    save_to_csv(CSV_FILENAME, login_time, contacts_time, open_a_contact_time, deals_time, open_a_deal_time)
 
 # If chromedriver.exe is not found in this project directory, please download from
 # http://chromedriver.storage.googleapis.com/index.html?path=2.30/
@@ -110,18 +112,59 @@ def get_open_a_contact_time(driver):
 
     # close contact page
     CLOSE_BUTTON_XPATH = "//*[@id=\"close_1\"]"
-    close_button = driver.find_element_by_xpath(CLOSE_BUTTON_XPATH)
-    close_button.click()
+    click_button(CLOSE_BUTTON_XPATH, driver)
 
     return first_contact_delta_secs
 
+def click_button(xpath, driver):
+    button = driver.find_element_by_xpath(xpath)
+    button.click()
 
-def save_to_csv(filename, login_time, contacts_time, open_contact_time):
+def get_deals_load_time(driver):
+    # click on deals tab
+    DEALS_XPATH = "//*[@id=\"module_125\"]"
+    deals = driver.find_element_by_xpath(DEALS_XPATH)
+    deals.click()
+    deals_start_time = time.time()
+
+    # wait until table displays
+    HEADER_XPATH = "//*[@id=\"t_125\"]/thead/tr/th[2]"
+    wait = WebDriverWait(driver, WEB_DRIVER_TIMEOUT_SECS)
+    header = wait.until(EC.element_to_be_clickable((By.XPATH, HEADER_XPATH)))
+    deals_end_time = time.time()
+
+    deals_delta_secs = deals_end_time - deals_start_time
+
+    return deals_delta_secs
+
+def get_open_deal_time(driver):
+    # click on first deal
+    FIRST_DEAL_XPATH = "//*[@id=\"tr_125_3105729\"]"
+    first_deal = driver.find_element_by_xpath(FIRST_DEAL_XPATH)
+    first_deal.click()
+    first_deal_start_time = time.time()
+
+    # wait for "Applicant" tab to be displayed
+    APPLICANT_XPATH = "//*[@id=\"ctl00_summary_ctl01_lbl\"]"
+    wait = WebDriverWait(driver, WEB_DRIVER_TIMEOUT_SECS)
+    applicant_tab = wait.until(EC.element_to_be_clickable((By.XPATH, APPLICANT_XPATH)))
+    first_deal_end_time = time.time()
+
+    first_deal_delta_secs = first_deal_end_time - first_deal_start_time
+
+    # close modal
+    CLOSE_BUTTON_XPATH = "//*[@id=\"close_2\"]"
+    click_button(CLOSE_BUTTON_XPATH, driver)
+
+    return first_deal_delta_secs
+
+
+def save_to_csv(filename, login_time, contacts_time, open_contact_time, deals_time, open_deal_time):
     time = get_time_est().strftime("%d/%m/%Y %H:%M EST")
     with open(filename, 'a') as file:
         writer = csv.writer(file)
         # format times with 2 decimal places
-        writer.writerow([format_time(login_time), format_time(contacts_time), format_time(open_contact_time), time])
+        writer.writerow([format_time(login_time), format_time(contacts_time), format_time(open_contact_time), format_time(deals_time), format_time(open_deal_time), time])
 
 def format_time(time):
     return "{:.2f}".format(time)
