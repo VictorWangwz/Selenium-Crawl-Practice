@@ -33,88 +33,11 @@ function convertTimestampsToDates(data){
 
 // this function should retrieve data.json and return (or callback) in the format that the current return is in
 function retrieveData(callback){
-    return [
-        [
-            "Date",
-            "Login",
-            "Contacts",
-            "Open Contact",
-            "Deals",
-            "Open Deal"
-        ],
-        [
-            1500416698.79,
-            5.89,
-            5.14,
-            0.88,
-            0.27,
-            0.95
-        ],
-        [
-            1500416728.41,
-            5.34,
-            5.16,
-            1.86,
-            0.39,
-            3.12
-        ],
-        [
-            1500416749.31,
-            5.59,
-            5.22,
-            1.27,
-            0.28,
-            1.17
-        ],
-        [
-            1500416771.11,
-            6.26,
-            5.06,
-            1.94,
-            0.28,
-            1.36
-        ],
-        [
-            1500416790.74,
-            5.04,
-            5.29,
-            1.49,
-            0.28,
-            1.16
-        ],
-        [
-            1500416811.41,
-            6.04,
-            5.07,
-            0.8,
-            0.27,
-            1.05
-        ],
-        [
-            1500417515.78,
-            5.37,
-            4.98,
-            2.48,
-            0.45,
-            3.13
-        ],
-        [
-            1500481271.9,
-            5.9,
-            12.98,
-            3.92,
-            0.49,
-            1.89
-        ],
-        [
-            1500484081.21,
-            4.86,
-            6.78,
-            1.17,
-            0.55,
-            2.05
-        ]
-    ];
+     return $.ajax({
+          url: "data.json",
+          dataType: "json",
+          async: false
+          }).responseText;
 }
 
 function selectHandler(e){
