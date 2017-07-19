@@ -11,8 +11,7 @@ function drawChart() {
         chartType: 'ScatterChart',
         containerId: 'chart_div',
         dataTable: data,
-        chartArea: {left: 25, top: 50, right: 25, bottom: 0},
-        options: {title: 'Mortgage Boss Loading Times', hAxis: {title: 'Date (EST)'}, vAxis: {title: 'Time (seconds)'}},
+        options: {title: 'Mortgage Boss Loading Times', hAxis: {title: 'Date'}, vAxis: {title: 'Time (seconds)'}},
     });
 
     addLegendToggling(chart);
@@ -81,7 +80,6 @@ function addLegendToggling(chart){
             // if row is undefined, we clicked on the legend
             if (sel[0].row == null) {
                 var col = sel[0].column;
-                console.log(columns[col]);
                 if (typeof(columns[col]) == 'number') {
                     var src = columns[col];
 
