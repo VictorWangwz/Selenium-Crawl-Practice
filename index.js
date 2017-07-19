@@ -1,53 +1,28 @@
 google.charts.load('current', {'packages':['corechart']});
 google.charts.setOnLoadCallback(drawChart);
 
-var chart;
-var options;
-var dataPoints;
-
-// function drawChart() {
-//     data = retrieveData();
-//     data = convertTimestampsToDates(data);
-//     dataPoints = google.visualization.arrayToDataTable(data);
-//
-//     options = {
-//         title: 'Mortgage Boss Loading Times',
-//         hAxis: {title: 'Date (EST)'},
-//         vAxis: {title: 'Time (seconds)'},
-//         selectionMode: 'multiple',
-//         series: {0: {color: 'blue', pointsVisible: true}, 1: {color: 'orange', pointsVisible: true}, 2: {color: 'red', pointsVisible: true}, 3: {color: 'green', pointsVisible: true}, 4: {color: 'purple', pointsVisible: true}}
-//     };
-//
-//     chart = new google.visualization.ScatterChart(document.getElementById('chart_div'));
-//     chart.draw(dataPoints, options);
-//
-//     google.visualization.events.addListener(chart, 'select', selectHandler);
-// }
-
 function drawChart() {
-    var data = retrieveData();
-    data = convertTimestampsToDates(data);
-    data = google.visualization.arrayToDataTable(data);
+    var dataPoints = retrieveData();
+    dataPoints = convertTimestampsToDates(dataPoints);
+    data = google.visualization.arrayToDataTable(dataPoints);
 
     // Instantiate and draw our chart, passing in some options.
     var chart = new google.visualization.ChartWrapper({
-        chartType: 'Scatter',
+        chartType: 'ScatterChart',
         containerId: 'chart_div',
         dataTable: data,
-        options: {
-            title: 'Mortgage Boss Loading Times',
-            hAxis: {title: 'Date (EST)'},
-            vAxis: {title: 'Time (seconds)'},
-            selectionMode: 'multiple',
-        },
+        chartArea: {left: 25, top: 50, right: 25, bottom: 0},
+        options: {width: 850, height: 450, dataOpacity: 1.0, title: 'Mortgage Boss Loading Times', hAxis: {title: 'Date (EST)'}, vAxis: {title: 'Time (seconds)'}},
     });
+
+    // Hide/Show code from: http://jsfiddle.net/asgallant/6gz2Q/
 
     // create columns array
     var columns = [0];
     /* the series map is an array of data series
      * "column" is the index of the data column to use for the series
      * "display" is a boolean, set to true to make the series visible on the initial draw
-     */
+    */
     var seriesMap = [{
         column: 1,
         display: true
@@ -248,24 +223,14 @@ function retrieveData(callback){
             1.67,
             0.27,
             2.57
+        ],
+        [
+            1500494044.99,
+            5.44,
+            5.3,
+            2.73,
+            0.39,
+            2.93
         ]
     ];
-}
-
-function selectHandler(e){
-    var selection = chart.getSelection();
-    var selectedSeries = getSelectedSeries(selection);
-    for (var i = 0; i < Object.keys(options["series"]).length; i++){
-        options.series[i].pointsVisible = selectedSeries[i] == true ? true : false;
-    }
-    chart.draw(dataPoints, options);
-}
-
-function getSelectedSeries(selection){
-    console.log(selection);
-    var selectedSeries = {};
-    selection.forEach(function (val) {
-        selectedSeries[val["column"] - 1] = true;
-    });
-    return selectedSeries;
 }
