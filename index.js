@@ -29,25 +29,6 @@ function drawChart() {
     data = convertTimestampsToDates(data);
     data = google.visualization.arrayToDataTable(data);
 
-    // var data = new google.visualization.DataTable();
-    // data.addColumn('number', 'X');
-    // data.addColumn('number', 'Y 1');
-    // data.addColumn({type: 'boolean', role: 'certainty'});
-    // data.addColumn('number', 'Y 2');
-    // data.addColumn({type: 'string', role: 'annotation'});
-    // data.addColumn({type: 'boolean', role: 'certainty'});
-    // data.addColumn('number', 'Y 3');
-    // data.addColumn({type: 'boolean', role: 'certainty'});
-
-    // // add random data
-    // var y1 = 50, y2 = 50, y3 = 50;
-    // for (var i = 0; i < 30; i++) {
-    //     y1 += ~~(Math.random() * 5) * Math.pow(-1, ~~(Math.random() * 2));
-    //     y2 += ~~(Math.random() * 5) * Math.pow(-1, ~~(Math.random() * 2));
-    //     y3 += ~~(Math.random() * 5) * Math.pow(-1, ~~(Math.random() * 2));
-    //     data.addRow([i, y1, (~~(Math.random() * 2) == 1), y2, y2.toString(), (~~(Math.random() * 2) == 1), y3, (~~(Math.random() * 2) == 1)]);
-    // }
-
     // Instantiate and draw our chart, passing in some options.
     var chart = new google.visualization.ChartWrapper({
         chartType: 'Scatter',
@@ -65,23 +46,22 @@ function drawChart() {
     var columns = [0];
     /* the series map is an array of data series
      * "column" is the index of the data column to use for the series
-     * "roleColumns" is an array of column indices corresponding to columns with roles that are associated with this data series
      * "display" is a boolean, set to true to make the series visible on the initial draw
      */
     var seriesMap = [{
-        column: 0,
-        display: true
-    }, {
         column: 1,
         display: true
     }, {
         column: 2,
-        display: true
+        display: false
     }, {
         column: 3,
         display: false
     }, {
         column: 4,
+        display: false
+    }, {
+        column: 5,
         display: false
     }];
     var columnsMap = {};
@@ -114,7 +94,6 @@ function drawChart() {
     }
 
     chart.setOption('series', series);
-    console.log(chart.getOptions());
 
     function showHideSeries () {
         var sel = chart.getChart().getSelection();
@@ -123,6 +102,7 @@ function drawChart() {
             // if row is undefined, we clicked on the legend
             if (sel[0].row == null) {
                 var col = sel[0].column;
+                console.log(columns[col]);
                 if (typeof(columns[col]) == 'number') {
                     var src = columns[col];
 
