@@ -72,7 +72,7 @@ def get_login_time(driver):
     driver.switch_to.window(driver.window_handles[1])
 
     # wait until "3 Days" tab is clickable (this could be replaced with any element on the homepage)
-    THREE_DAYS_TAB_XPATH = "//*[@id=\"ctl06_home_tabs_a_tab_1\"]"
+    THREE_DAYS_TAB_XPATH = "//*[@id=\"ctl07_home_tabs_a_tab_1\"]"
     wait = WebDriverWait(driver, WEB_DRIVER_TIMEOUT_SECS)
     three_days_tab = wait.until(EC.element_to_be_clickable((By.XPATH, THREE_DAYS_TAB_XPATH)))
 

@@ -2,21 +2,20 @@ google.charts.load('current', {'packages':['corechart']});
 google.charts.setOnLoadCallback(drawChart);
 
 var chart;
+var options;
+var dataPoints;
 
 function drawChart() {
     data = retrieveData();
-    var dataPoints = google.visualization.arrayToDataTable(data);
-    var minH = getMinH(data) - 30;
-    var maxH = getMaxH(data) + 30;
-    var minV = 0;
-    var maxV = getMaxV(data) + 3;
+    data = convertTimestampsToDates(data);
+    dataPoints = google.visualization.arrayToDataTable(data);
 
-    var options = {
+    options = {
         title: 'Mortgage Boss Loading Times',
-        hAxis: {title: 'Date (EST)', minValue: minH, maxValue: maxH},
-        vAxis: {title: 'Time (seconds)', minValue: minV, maxValue: maxV},
+        hAxis: {title: 'Date (EST)'},
+        vAxis: {title: 'Time (seconds)'},
         selectionMode: 'multiple',
-        series: {1: {color: 'orange', pointsVisible: true}, 2: {color: 'red'}, 3: {color: 'green'}},
+        series: {0: {color: 'blue', pointsVisible: true}, 1: {color: 'orange', pointsVisible: true}, 2: {color: 'red', pointsVisible: true}, 3: {color: 'green', pointsVisible: true}, 4: {color: 'purple', pointsVisible: true}}
     };
 
     chart = new google.visualization.ScatterChart(document.getElementById('chart_div'));
@@ -25,39 +24,15 @@ function drawChart() {
     google.visualization.events.addListener(chart, 'select', selectHandler);
 }
 
-// gets minimum X axis value
-function getMinH(data){
-    const firstDataEntry = data[1];   // get first data entry
-    return firstDataEntry[0];   // get time column
-}
-
-// gets max X axis value
-function getMaxH(data){
-    const lastDataEntry = data[data.length - 1];
-    return lastDataEntry[0];
-}
-
-// get max Y axis value
-function getMaxV(data){
-    var max = 0;
-    data.forEach(function(entry){   // iterate through all data entries and find the largest loading time
-        entry.slice(1, entry.length).forEach(function(val){ // skip first column (this is the timestamp)
-            if (!isNaN(val)){
-                if (val > max) {
-                    max = val;
-                }
-            }
-        });
+function convertTimestampsToDates(data){
+    return data.map(function(entry){
+       entry[0] = new Date(entry[0] * 1000);
+       return entry;
     });
-    return max;
 }
 
 // this function should retrieve data.json and return (or callback) in the format that the current return is in
 function retrieveData(callback){
-    $.ajax({
-        url: "data.csv"
-    })
-
     return [
         [
             "Date",
@@ -122,11 +97,40 @@ function retrieveData(callback){
             2.48,
             0.45,
             3.13
+        ],
+        [
+            1500481271.9,
+            5.9,
+            12.98,
+            3.92,
+            0.49,
+            1.89
+        ],
+        [
+            1500484081.21,
+            4.86,
+            6.78,
+            1.17,
+            0.55,
+            2.05
         ]
     ];
 }
 
 function selectHandler(e){
-    var selection = chart.getSelection()
-    console.log(selection[1])
+    var selection = chart.getSelection();
+    var selectedSeries = getSelectedSeries(selection);
+    for (var i = 0; i < Object.keys(options["series"]).length; i++){
+        options.series[i].pointsVisible = selectedSeries[i] == true ? true : false;
+    }
+    chart.draw(dataPoints, options);
+}
+
+function getSelectedSeries(selection){
+    console.log(selection);
+    var selectedSeries = {};
+    selection.forEach(function (val) {
+        selectedSeries[val["column"] - 1] = true;
+    });
+    return selectedSeries;
 }
