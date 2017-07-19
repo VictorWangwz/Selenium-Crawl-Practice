@@ -12,32 +12,36 @@ function drawChart() {
         containerId: 'chart_div',
         dataTable: data,
         chartArea: {left: 25, top: 50, right: 25, bottom: 0},
-        options: {width: 850, height: 450, dataOpacity: 1.0, title: 'Mortgage Boss Loading Times', hAxis: {title: 'Date (EST)'}, vAxis: {title: 'Time (seconds)'}},
+        options: {title: 'Mortgage Boss Loading Times', hAxis: {title: 'Date (EST)'}, vAxis: {title: 'Time (seconds)'}},
     });
 
-    // Hide/Show code from: http://jsfiddle.net/asgallant/6gz2Q/
+    addLegendToggling(chart);
+    chart.draw();
+}
 
+// Hide/Show code from: http://jsfiddle.net/asgallant/6gz2Q/
+function addLegendToggling(chart){
     // create columns array
     var columns = [0];
     /* the series map is an array of data series
      * "column" is the index of the data column to use for the series
      * "display" is a boolean, set to true to make the series visible on the initial draw
     */
-    var seriesMap = [{
+    var seriesMap = [{  // should correspond to each series of data
         column: 1,
         display: true
     }, {
         column: 2,
-        display: false
+        display: true
     }, {
         column: 3,
-        display: false
+        display: true
     }, {
         column: 4,
-        display: false
+        display: true
     }, {
         column: 5,
-        display: false
+        display: true
     }];
     var columnsMap = {};
     var series = [];
@@ -115,14 +119,6 @@ function drawChart() {
     var view = {
         columns: columns
     };
-    chart.draw();
-}
-
-function convertTimestampsToDates(data){
-    return data.map(function(entry){
-       entry[0] = new Date(entry[0] * 1000);
-       return entry;
-    });
 }
 
 // this function should retrieve data.json and return (or callback) in the format that the current return is in
@@ -231,6 +227,22 @@ function retrieveData(callback){
             2.73,
             0.39,
             2.93
+        ],
+        [
+            1500495783.36,
+            6.97,
+            5.07,
+            2.29,
+            0.27,
+            1.93
         ]
     ];
+}
+
+// converts the X value (Date) in each data point from timestamp to Date object
+function convertTimestampsToDates(data){
+    return data.map(function(entry){
+       entry[0] = new Date(entry[0] * 1000);
+       return entry;
+    });
 }
