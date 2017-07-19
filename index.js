@@ -5,23 +5,162 @@ var chart;
 var options;
 var dataPoints;
 
+// function drawChart() {
+//     data = retrieveData();
+//     data = convertTimestampsToDates(data);
+//     dataPoints = google.visualization.arrayToDataTable(data);
+//
+//     options = {
+//         title: 'Mortgage Boss Loading Times',
+//         hAxis: {title: 'Date (EST)'},
+//         vAxis: {title: 'Time (seconds)'},
+//         selectionMode: 'multiple',
+//         series: {0: {color: 'blue', pointsVisible: true}, 1: {color: 'orange', pointsVisible: true}, 2: {color: 'red', pointsVisible: true}, 3: {color: 'green', pointsVisible: true}, 4: {color: 'purple', pointsVisible: true}}
+//     };
+//
+//     chart = new google.visualization.ScatterChart(document.getElementById('chart_div'));
+//     chart.draw(dataPoints, options);
+//
+//     google.visualization.events.addListener(chart, 'select', selectHandler);
+// }
+
 function drawChart() {
-    data = retrieveData();
+    var data = retrieveData();
     data = convertTimestampsToDates(data);
-    dataPoints = google.visualization.arrayToDataTable(data);
+    data = google.visualization.arrayToDataTable(data);
 
-    options = {
-        title: 'Mortgage Boss Loading Times',
-        hAxis: {title: 'Date (EST)'},
-        vAxis: {title: 'Time (seconds)'},
-        selectionMode: 'multiple',
-        series: {0: {color: 'blue', pointsVisible: true}, 1: {color: 'orange', pointsVisible: true}, 2: {color: 'red', pointsVisible: true}, 3: {color: 'green', pointsVisible: true}, 4: {color: 'purple', pointsVisible: true}}
+    // var data = new google.visualization.DataTable();
+    // data.addColumn('number', 'X');
+    // data.addColumn('number', 'Y 1');
+    // data.addColumn({type: 'boolean', role: 'certainty'});
+    // data.addColumn('number', 'Y 2');
+    // data.addColumn({type: 'string', role: 'annotation'});
+    // data.addColumn({type: 'boolean', role: 'certainty'});
+    // data.addColumn('number', 'Y 3');
+    // data.addColumn({type: 'boolean', role: 'certainty'});
+
+    // // add random data
+    // var y1 = 50, y2 = 50, y3 = 50;
+    // for (var i = 0; i < 30; i++) {
+    //     y1 += ~~(Math.random() * 5) * Math.pow(-1, ~~(Math.random() * 2));
+    //     y2 += ~~(Math.random() * 5) * Math.pow(-1, ~~(Math.random() * 2));
+    //     y3 += ~~(Math.random() * 5) * Math.pow(-1, ~~(Math.random() * 2));
+    //     data.addRow([i, y1, (~~(Math.random() * 2) == 1), y2, y2.toString(), (~~(Math.random() * 2) == 1), y3, (~~(Math.random() * 2) == 1)]);
+    // }
+
+    // Instantiate and draw our chart, passing in some options.
+    var chart = new google.visualization.ChartWrapper({
+        chartType: 'Scatter',
+        containerId: 'chart_div',
+        dataTable: data,
+        options: {
+            title: 'Mortgage Boss Loading Times',
+            hAxis: {title: 'Date (EST)'},
+            vAxis: {title: 'Time (seconds)'},
+            selectionMode: 'multiple',
+        },
+    });
+
+    // create columns array
+    var columns = [0];
+    /* the series map is an array of data series
+     * "column" is the index of the data column to use for the series
+     * "roleColumns" is an array of column indices corresponding to columns with roles that are associated with this data series
+     * "display" is a boolean, set to true to make the series visible on the initial draw
+     */
+    var seriesMap = [{
+        column: 0,
+        display: true
+    }, {
+        column: 1,
+        display: true
+    }, {
+        column: 2,
+        display: true
+    }, {
+        column: 3,
+        display: false
+    }, {
+        column: 4,
+        display: false
+    }];
+    var columnsMap = {};
+    var series = [];
+    for (var i = 0; i < seriesMap.length; i++) {
+        var col = seriesMap[i].column;
+        columnsMap[col] = i;
+        // set the default series option
+        series[i] = {};
+        if (seriesMap[i].display) {
+            // if the column is the domain column or in the default list, display the series
+            columns.push(col);
+        }
+        else {
+            // otherwise, hide it
+            columns.push({
+                label: data.getColumnLabel(col),
+                type: data.getColumnType(col),
+                sourceColumn: col,
+                calc: function () {
+                    return null;
+                }
+            });
+            // backup the default color (if set)
+            if (typeof(series[i].color) !== 'undefined') {
+                series[i].backupColor = series[i].color;
+            }
+            series[i].color = '#CCCCCC';
+        }
+    }
+
+    chart.setOption('series', series);
+    console.log(chart.getOptions());
+
+    function showHideSeries () {
+        var sel = chart.getChart().getSelection();
+        // if selection length is 0, we deselected an element
+        if (sel.length > 0) {
+            // if row is undefined, we clicked on the legend
+            if (sel[0].row == null) {
+                var col = sel[0].column;
+                if (typeof(columns[col]) == 'number') {
+                    var src = columns[col];
+
+                    // hide the data series
+                    columns[col] = {
+                        label: data.getColumnLabel(src),
+                        type: data.getColumnType(src),
+                        sourceColumn: src,
+                        calc: function () {
+                            return null;
+                        }
+                    };
+
+                    // grey out the legend entry
+                    series[columnsMap[src]].color = '#CCCCCC';
+                }
+                else {
+                    var src = columns[col].sourceColumn;
+
+                    // show the data series
+                    columns[col] = src;
+                    series[columnsMap[src]].color = null;
+                }
+                var view = chart.getView() || {};
+                view.columns = columns;
+                chart.setView(view);
+                chart.draw();
+            }
+        }
+    }
+
+    google.visualization.events.addListener(chart, 'select', showHideSeries);
+
+    // create a view with the default columns
+    var view = {
+        columns: columns
     };
-
-    chart = new google.visualization.ScatterChart(document.getElementById('chart_div'));
-    chart.draw(dataPoints, options);
-
-    google.visualization.events.addListener(chart, 'select', selectHandler);
+    chart.draw();
 }
 
 function convertTimestampsToDates(data){
@@ -113,6 +252,22 @@ function retrieveData(callback){
             1.17,
             0.55,
             2.05
+        ],
+        [
+            1500488051.02,
+            5.53,
+            8.69,
+            1.14,
+            0.27,
+            3.0
+        ],
+        [
+            1500489389.84,
+            5.72,
+            5.57,
+            1.67,
+            0.27,
+            2.57
         ]
     ];
 }
