@@ -7,8 +7,10 @@ from selenium.webdriver.support.ui import WebDriverWait
 from datetime import datetime
 import csv
 import pytz
+import json
 
 CSV_FILENAME = "data.csv"
+JSON_FILENAME = "data.json"
 WEB_DRIVER_TIMEOUT_SECS = 600
 
 def main():
@@ -24,6 +26,7 @@ def main():
     driver.quit()
 
     save_to_csv(CSV_FILENAME, login_time, contacts_time, open_a_contact_time, deals_time, open_a_deal_time)
+    save_to_js(JSON_FILENAME, login_time, contacts_time, open_a_contact_time, deals_time, open_a_deal_time)
 
 # If chromedriver.exe is not found in this project directory, please download from
 # http://chromedriver.storage.googleapis.com/index.html?path=2.30/
@@ -166,8 +169,20 @@ def save_to_csv(filename, login_time, contacts_time, open_contact_time, deals_ti
         # format times with 2 decimal places
         writer.writerow([format_time(login_time), format_time(contacts_time), format_time(open_contact_time), format_time(deals_time), format_time(open_deal_time), time])
 
+def save_to_js(filename, login_time, contacts_time, open_contact_time, deals_time, open_deal_time):
+    # time = get_time_est().strftime("%d/%m/%Y %H:%M")
+    import time
+    time = format_time(time.time())
+    with open(filename) as file:
+        fileJSON = json.load(file)
+        data = fileJSON["data"]
+        data.append([time, format_time(login_time), format_time(contacts_time), format_time(open_contact_time), format_time(deals_time), format_time(open_deal_time)])
+
+    with open(filename, "w") as outfile:
+        json.dump({'data': data}, outfile, indent=4)
+
 def format_time(time):
-    return "{:.2f}".format(time)
+    return float("{:.2f}".format(time))
 
 def get_time_est():
     etc_timezone = pytz.timezone('US/Eastern')
