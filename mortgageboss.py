@@ -12,6 +12,8 @@ import json
 CSV_FILENAME = "data.csv"
 JSON_FILENAME = "data.json"
 WEB_DRIVER_TIMEOUT_SECS = 600
+TEST_USER = "lucaisho"
+TEST_PASS = "password1"
 
 def main():
     driver = create_driver()
@@ -46,8 +48,6 @@ def create_driver():
 # logs into MortgageBoss and returns the time taken for the "3 days" tab to load
 def get_login_time(driver):
     MORTGAGE_BOSS_URL = "https://mortgageboss.ca/login.aspx"
-    TEST_USER = "lucaisho"
-    TEST_PASS = "password1"
 
     # navigate to the application home page
     driver.get(MORTGAGE_BOSS_URL)
@@ -175,11 +175,11 @@ def save_to_js(filename, login_time, contacts_time, open_contact_time, deals_tim
     time = format_time(time.time())
     with open(filename) as file:
         fileJSON = json.load(file)
-        data = fileJSON["data"]
+        data = fileJSON["dates"]
         data.append([time, format_time(login_time), format_time(contacts_time), format_time(open_contact_time), format_time(deals_time), format_time(open_deal_time)])
 
     with open(filename, "w") as outfile:
-        json.dump({'data': data}, outfile, indent=4)
+        json.dump({'dates': data}, outfile, indent=4)
 
 def format_time(time):
     return float("{:.2f}".format(time))

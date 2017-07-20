@@ -132,7 +132,6 @@ function retrieveData(){
           dataType: "json",
           async: false
         }).responseJSON);
-
 }
 
 // converts the X value (Date) in each data point from timestamp to Date object
