@@ -12,8 +12,8 @@ import json
 CSV_FILENAME = "data.csv"
 JSON_FILENAME = "data.json"
 WEB_DRIVER_TIMEOUT_SECS = 600
-TEST_USER = "lucaisho"
-TEST_PASS = "password1"
+TEST_USER = "vitorpena"
+TEST_PASS = "password"
 
 def main():
     driver = create_driver()
@@ -23,12 +23,13 @@ def main():
     open_a_contact_time = get_open_a_contact_time(driver)
     deals_time = get_deals_load_time(driver)
     open_a_deal_time = get_open_deal_time(driver)
+    organization_contacts_time = get_organization_contacts_time(driver)
 
     logout(driver)
     driver.quit()
 
-    save_to_csv(CSV_FILENAME, login_time, contacts_time, open_a_contact_time, deals_time, open_a_deal_time)
-    save_to_js(JSON_FILENAME, login_time, contacts_time, open_a_contact_time, deals_time, open_a_deal_time)
+    save_to_csv(CSV_FILENAME, login_time, contacts_time, open_a_contact_time, deals_time, open_a_deal_time, organization_contacts_time)
+    save_to_js(JSON_FILENAME, login_time, contacts_time, open_a_contact_time, deals_time, open_a_deal_time, organization_contacts_time)
 
 # If chromedriver.exe is not found in this project directory, please download from
 # http://chromedriver.storage.googleapis.com/index.html?path=2.30/
@@ -100,7 +101,7 @@ def get_contacts_load_time(driver):
 
 def get_open_a_contact_time(driver):
     # click on first contact
-    FIRST_CONTACT_XPATH = "//*[@id=\"tr_5_996016\"]"
+    FIRST_CONTACT_XPATH = "//*[@id=\"tr_5_698897\"]/td[2]"
     first_contact = driver.find_element_by_xpath(FIRST_CONTACT_XPATH)
     first_contact.click()
     first_contact_start_time = time.time()
@@ -142,7 +143,7 @@ def get_deals_load_time(driver):
 
 def get_open_deal_time(driver):
     # click on first deal
-    FIRST_DEAL_XPATH = "//*[@id=\"tr_125_3105729\"]"
+    FIRST_DEAL_XPATH = "//*[@id=\"tr_125_1276645\"]/td[2]"
     first_deal = driver.find_element_by_xpath(FIRST_DEAL_XPATH)
     first_deal.click()
     first_deal_start_time = time.time()
@@ -161,22 +162,50 @@ def get_open_deal_time(driver):
 
     return first_deal_delta_secs
 
+def get_organization_contacts_time(driver):
+    # click on organizations tab
+    ORGANIZATIONS_XPATH = "//*[@id=\"module_4\"]"
+    driver.find_element_by_xpath(ORGANIZATIONS_XPATH).click()
+    organization_contacts_start_time = time.time()
 
-def save_to_csv(filename, login_time, contacts_time, open_contact_time, deals_time, open_deal_time):
+    # click on organization
+    ORGANIZATION_XPATH = "//*[@id=\"tr_4_1098\"]/td[2]"
+    driver.find_element_by_xpath(ORGANIZATION_XPATH).click()
+
+    # click on contacts tab
+    CONTACTS_XPATH = "//*[@id=\"a_tab_3_5\"]"
+    driver.find_element_by_xpath(CONTACTS_XPATH).click()
+
+    # wait for table to display
+    CONTACT_NAME_XPATH = "//*[@id=\"t_5\"]/thead/tr/th[2]/a"
+    wait = WebDriverWait(driver, WEB_DRIVER_TIMEOUT_SECS)
+    wait.until(EC.element_to_be_clickable((By.XPATH, CONTACT_NAME_XPATH)))
+    organization_contacts_end_time = time.time()
+
+    organization_contacts_delta_secs = organization_contacts_end_time - organization_contacts_start_time
+
+    # close modal
+    CLOSE_BUTTON_XPATH = "//*[@id=\"close_3\"]"
+    click_button(CLOSE_BUTTON_XPATH, driver)
+
+    return organization_contacts_delta_secs
+
+
+def save_to_csv(filename, login_time, contacts_time, open_contact_time, deals_time, open_deal_time, organization_contacts_time):
     time = get_time_est().strftime("%d/%m/%Y %H:%M EST")
     with open(filename, 'a') as file:
         writer = csv.writer(file)
         # format times with 2 decimal places
-        writer.writerow([format_time(login_time), format_time(contacts_time), format_time(open_contact_time), format_time(deals_time), format_time(open_deal_time), time])
+        writer.writerow([format_time(login_time), format_time(contacts_time), format_time(open_contact_time), format_time(deals_time), format_time(open_deal_time), format_time(organization_contacts_time), time])
 
-def save_to_js(filename, login_time, contacts_time, open_contact_time, deals_time, open_deal_time):
+def save_to_js(filename, login_time, contacts_time, open_contact_time, deals_time, open_deal_time, organization_contacts_time):
     # time = get_time_est().strftime("%d/%m/%Y %H:%M")
     import time
     time = format_time(time.time())
     with open(filename) as file:
         fileJSON = json.load(file)
         data = fileJSON["dates"]
-        data.append([time, format_time(login_time), format_time(contacts_time), format_time(open_contact_time), format_time(deals_time), format_time(open_deal_time)])
+        data.append([time, format_time(login_time), format_time(contacts_time), format_time(open_contact_time), format_time(deals_time), format_time(open_deal_time), format_time(organization_contacts_time)])
 
     with open(filename, "w") as outfile:
         json.dump({'dates': data}, outfile, indent=4)
