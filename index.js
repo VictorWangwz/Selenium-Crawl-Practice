@@ -1,9 +1,16 @@
 google.charts.load('current', {'packages':['corechart']});
 google.charts.setOnLoadCallback(drawChart);
 
+$.ajaxSetup({
+    async: false
+});
+
 function drawChart() {
     var dataPoints = retrieveData();
-    dataPoints = convertTimestampsToDates(dataPoints);
+    //console.log(dataPoints);
+    //dataPoints = convertTimestampsToDates(dataPoints);
+    //console.log(dataPoints);
+    console.log(dataPoints);
     data = google.visualization.arrayToDataTable(dataPoints);
 
     // Instantiate and draw our chart, passing in some options.
@@ -120,17 +127,37 @@ function addLegendToggling(chart){
 }
 
 function retrieveData(){
-     return $.ajax({
+    return convertTimestampsToDates($.ajax({
           url: "data.json",
           dataType: "json",
           async: false
-          }).responseText;
+        }).responseJSON);
+
 }
 
 // converts the X value (Date) in each data point from timestamp to Date object
 function convertTimestampsToDates(data){
-    return data.map(function(entry){
+    
+    //console.log(data);
+    return data.dates.map(function(entry){
        entry[0] = new Date(entry[0] * 1000);
+       //entry [0] = formatDate(entry[0]);
+       entry[0] = DateFormat.format.date(entry[0], "dd/MMM - HH:mm");
        return entry;
     });
+}
+
+function formatDate(date) {
+  var monthNames = [
+    "January", "February", "March",
+    "April", "May", "June", "July",
+    "August", "September", "October",
+    "November", "December"
+  ];
+
+  var day = date.getDate();
+  var monthIndex = date.getMonth();
+  var hours = date.getHours();
+
+  return + hours + 'h ' + day + ' ' + monthNames[monthIndex];
 }
