@@ -138,7 +138,7 @@ function retrieveData(){
             "Open Contact",
             "Deals",
             "Open Deal",
-            "Organization Contacts"
+            "Organization Contacts",
         ],
         [
             1500416698.79,
@@ -278,19 +278,24 @@ function retrieveData(){
             1.02,
             6.63
         ]
-    ]
+    ];
     // return convertTimestampsToDates($.ajax({
     //       url: "data.json",
     //       dataType: "json",
     //       async: false
     //     }).responseJSON);
-
+    // dates = $.ajax({
+    //       url: "data.json",
+    //       dataType: "json",
+    //       async: false
+    //     }).responseJSON["dates"];
     fillRowsWithNullsIfNeeded(dates);
-    return dates;
+    return convertTimestampsToDates(dates);
 }
 
 // some rows may have all the series data while others may not. Those that do not need to be padded with nulls to be displayed in the graph
 function fillRowsWithNullsIfNeeded(data){
+    console.log(data);
     const numSeries = data[0].length;                   // get amount of series there are
     data.slice(1,data.length).forEach(function(entry){  // pad every row (after titles) with nulls if they are not the same size as numSeries
         while(entry.length < numSeries){
@@ -301,9 +306,7 @@ function fillRowsWithNullsIfNeeded(data){
 
 // converts the X value (Date) in each data point from timestamp to Date object
 function convertTimestampsToDates(data){
-    
-    //console.log(data);
-    return data.dates.map(function(entry){
+    return dates.map(function(entry){
        entry[0] = new Date(entry[0] * 1000);
        //entry [0] = formatDate(entry[0]);
        entry[0] = DateFormat.format.date(entry[0], "dd/MMM - HH:mm");
