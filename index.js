@@ -150,7 +150,7 @@ function fillRowsWithNullsIfNeeded(data){
 }
 
 // converts the X value (Date) in each data point from timestamp to Date object
-function convertTimestampsToDates(data){
+function convertTimestampsToDates(dates){
     return dates.map(function(entry){
        entry[0] = new Date(entry[0] * 1000);
        //entry [0] = formatDate(entry[0]);
