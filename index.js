@@ -15,10 +15,35 @@ function drawChart() {
 
     // Instantiate and draw our chart, passing in some options.
     var chart = new google.visualization.ChartWrapper({
-        chartType: 'ScatterChart',
+        chartType: 'LineChart',
         containerId: 'chart_div',
         dataTable: data,
-        options: {title: 'Mortgage Boss Loading Times', hAxis: {title: 'Date'}, vAxis: {title: 'Time (seconds)'}},
+        options: {
+            title: 'Mortgage Boss Loading Times', 
+            pointSize: 7.5,
+            pointShape: { type: 'star', sides: 5, dent: 0.8 },
+            lineWidth: 1,
+            curveType: 'function',
+            dataOpacity: .5,
+            hAxis: {
+                title: 'Date',
+                titleTextStyle: {
+                    color: '#333'
+                },
+                format: 'dd/MMM - HH:mm'
+            }, 
+            vAxis: {
+                title: 'Time (seconds)',
+                minValue: 0
+            },
+            explorer: {
+                actions: ['dragToZoom', 'rightClickToReset'],
+                axis: 'horizontal',
+                keepInBounds: true,
+                maxZoomIn: 50.0,
+                zoomDelta: 0.5
+            }
+        },
     });
 
     addLegendToggling(chart);
@@ -154,22 +179,7 @@ function convertTimestampsToDates(dates){
     return dates.map(function(entry){
        entry[0] = new Date(entry[0] * 1000);
        //entry [0] = formatDate(entry[0]);
-       entry[0] = DateFormat.format.date(entry[0], "dd/MMM - HH:mm");
+       //entry[0] = DateFormat.format.date(entry[0], "dd/MMM - HH:mm");
        return entry;
     });
-}
-
-function formatDate(date) {
-  var monthNames = [
-    "January", "February", "March",
-    "April", "May", "June", "July",
-    "August", "September", "October",
-    "November", "December"
-  ];
-
-  var day = date.getDate();
-  var monthIndex = date.getMonth();
-  var hours = date.getHours();
-
-  return + hours + 'h ' + day + ' ' + monthNames[monthIndex];
 }
