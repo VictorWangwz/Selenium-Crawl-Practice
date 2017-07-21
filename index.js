@@ -279,12 +279,24 @@ function retrieveData(){
             6.63
         ]
     ]
-    return dates;
     // return convertTimestampsToDates($.ajax({
     //       url: "data.json",
     //       dataType: "json",
     //       async: false
     //     }).responseJSON);
+
+    fillRowsWithNullsIfNeeded(dates);
+    return dates;
+}
+
+// some rows may have all the series data while others may not. Those that do not need to be padded with nulls to be displayed in the graph
+function fillRowsWithNullsIfNeeded(data){
+    const numSeries = data[0].length;                   // get amount of series there are
+    data.slice(1,data.length).forEach(function(entry){  // pad every row (after titles) with nulls if they are not the same size as numSeries
+        while(entry.length < numSeries){
+            entry.push(null);
+        }
+    });
 }
 
 // converts the X value (Date) in each data point from timestamp to Date object
